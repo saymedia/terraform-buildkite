@@ -28,9 +28,13 @@ providers {
 ```terraform
 provider "buildkite" {
   # Get an API token from https://buildkite.com/user/api-access-tokens
-  # Needs: read_pipelines, write_pipelines  
-  api_token    = "YOUR_API_TOKEN"
+  # Needs: read_pipelines, write_pipelines
+  # Instead of embedding the API token in the .tf file,
+  # it can also be passed via env variable BUILDKITE_API_TOKEN
+  api_token    = "YOUR_API_TOKEN"
   # This is the part behind https://buildkite.com/, e.g. https://buildkite.com/some-org
+  # Instead of embedding the org slug in the .tf file,
+  # it can also be passed via env variable BUILDKITE_ORGANIZATION
   organization = "YOUR_ORG_SLUG"
 }
 
