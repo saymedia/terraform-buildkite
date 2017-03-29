@@ -115,9 +115,8 @@ func (c *Client) doJSON(method string, pathParts []string, reqBody, resBody inte
 
 	if resBody != nil {
 		return json.Unmarshal(resBodyBytes, resBody)
-	} else {
-		return nil
 	}
+	return nil
 }
 
 type notFound struct {
