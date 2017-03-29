@@ -1,8 +1,8 @@
 package main
 
 import (
-	"../buildkite"
 	"github.com/hashicorp/terraform/plugin"
+	"github.com/saymedia/terraform-buildkite/buildkite"
 )
 
 func main() {
