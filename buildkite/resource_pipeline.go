@@ -6,132 +6,159 @@ import (
 	"github.com/hashicorp/terraform/helper/schema"
 )
 
+const pipelineBadgeURL = "badge_url"
+const pipelineBranchConfiguration = "branch_configuration"
+const pipelineBuildsURL = "builds_url"
+const pipelineCreatedAt = "created_at"
+const pipelineDefaultBranch = "default_branch"
+const pipelineDescription = "pipelineDescription"
+const pipelineEnv = "env"
+const pipelineID = "id"
+const pipelineName = "name"
+const pipelineProviderSettings = "provider_settings"
+const pipelineRepository = "repository"
+const pipelineSlug = "slug"
+const pipelineSteps = "step"
+const pipelineURL = "url"
+const pipelineWebURL = "web_url"
+const pipelineWebhookURL = "webhook_url"
+const stepAgentQueryRules = "agent_query_rules"
+const stepArtifactPaths = "artifact_paths"
+const stepBranchConfiguration = "branch_configuration"
+const stepConcurrency = "concurrency"
+const stepCommand = "command"
+const stepEnv = "env"
+const stepName = "name"
+const stepParallelism = "parallelism"
+const stepTimeoutInMinutes = "timeout_in_minutes"
+const stepType = "type"
+
 func resourcePipeline() *schema.Resource {
 	return &schema.Resource{
-		Create: CreatePipeline,
-		Read:   ReadPipeline,
-		Update: UpdatePipeline,
-		Delete: DeletePipeline,
+		Create: createPipeline,
+		Read:   readPipeline,
+		Update: updatePipeline,
+		Delete: deletePipeline,
 		Importer: &schema.ResourceImporter{
 			State: schema.ImportStatePassthrough,
 		},
 
 		Schema: map[string]*schema.Schema{
-			"id": &schema.Schema{
+			pipelineID: &schema.Schema{
 				Type:     schema.TypeString,
 				Computed: true,
 			},
-			"slug": &schema.Schema{
+			pipelineSlug: &schema.Schema{
 				Type:     schema.TypeString,
 				Computed: true,
 				Optional: true,
 			},
-			"web_url": &schema.Schema{
+			pipelineWebURL: &schema.Schema{
 				Type:     schema.TypeString,
 				Computed: true,
 			},
-			"builds_url": &schema.Schema{
+			pipelineBuildsURL: &schema.Schema{
 				Type:     schema.TypeString,
 				Computed: true,
 			},
-			"created_at": &schema.Schema{
+			pipelineCreatedAt: &schema.Schema{
 				Type:     schema.TypeString,
 				Computed: true,
 			},
-			"url": &schema.Schema{
+			pipelineURL: &schema.Schema{
 				Type:     schema.TypeString,
 				Computed: true,
 			},
-			"badge_url": &schema.Schema{
+			pipelineBadgeURL: &schema.Schema{
 				Type:     schema.TypeString,
 				Computed: true,
 			},
-			"name": &schema.Schema{
+			pipelineName: &schema.Schema{
 				Type:     schema.TypeString,
 				Required: true,
 			},
-			"description": &schema.Schema{
+			pipelineDescription: &schema.Schema{
 				Type:     schema.TypeString,
 				Optional: true,
 			},
-			"repository": &schema.Schema{
+			pipelineRepository: &schema.Schema{
 				Type:     schema.TypeString,
 				Required: true,
 			},
-			"branch_configuration": &schema.Schema{
+			pipelineBranchConfiguration: &schema.Schema{
 				Type:     schema.TypeString,
 				Optional: true,
 			},
-			"default_branch": &schema.Schema{
+			pipelineDefaultBranch: &schema.Schema{
 				Type:     schema.TypeString,
 				Optional: true,
 			},
-			"env": &schema.Schema{
+			pipelineEnv: &schema.Schema{
 				Type:     schema.TypeMap,
 				Optional: true,
 				Elem: &schema.Schema{
 					Type: schema.TypeString,
 				},
 			},
-			"provider_settings": &schema.Schema{
+			pipelineProviderSettings: &schema.Schema{
 				Type:     schema.TypeMap,
 				Optional: true,
 				Elem: &schema.Schema{
 					Type: schema.TypeBool,
 				},
 			},
-			"webhook_url": &schema.Schema{
+			pipelineWebhookURL: &schema.Schema{
 				Type:     schema.TypeString,
 				Computed: true,
 			},
-			"step": &schema.Schema{
+			pipelineSteps: &schema.Schema{
 				Type:     schema.TypeList,
 				Required: true,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
-						"type": &schema.Schema{
+						stepType: &schema.Schema{
 							Type:     schema.TypeString,
 							Required: true,
 						},
-						"name": &schema.Schema{
+						stepName: &schema.Schema{
 							Type:     schema.TypeString,
 							Optional: true,
 						},
-						"command": &schema.Schema{
+						stepCommand: &schema.Schema{
 							Type:     schema.TypeString,
 							Optional: true,
 						},
-						"env": &schema.Schema{
+						stepEnv: &schema.Schema{
 							Type:     schema.TypeMap,
 							Optional: true,
 							Elem: &schema.Schema{
 								Type: schema.TypeString,
 							},
 						},
-						"timeout_in_minutes": &schema.Schema{
+						stepTimeoutInMinutes: &schema.Schema{
 							Type:     schema.TypeInt,
 							Optional: true,
 						},
-						"agent_query_rules": &schema.Schema{
+						stepAgentQueryRules: &schema.Schema{
 							Type:     schema.TypeList,
 							Optional: true,
 							Elem: &schema.Schema{
 								Type: schema.TypeString,
 							},
 						},
-						"artifact_paths": &schema.Schema{
+						stepArtifactPaths: &schema.Schema{
 							Type:     schema.TypeString,
 							Optional: true,
 						},
-						"branch_configuration": &schema.Schema{
+						stepBranchConfiguration: &schema.Schema{
 							Type:     schema.TypeString,
 							Optional: true,
 						},
-						"concurrency": &schema.Schema{
+						stepConcurrency: &schema.Schema{
 							Type:     schema.TypeInt,
 							Optional: true,
 						},
-						"parallelism": &schema.Schema{
+						stepParallelism: &schema.Schema{
 							Type:     schema.TypeInt,
 							Optional: true,
 						},
@@ -142,51 +169,51 @@ func resourcePipeline() *schema.Resource {
 	}
 }
 
-type Pipeline struct {
-	Id                  string            `json:"id,omitempty"`
-	Environment         map[string]string `json:"env,omitempty"`
-	Slug                string            `json:"slug,omitempty"`
-	WebURL              string            `json:"web_url,omitempty"`
-	BuildsURL           string            `json:"builds_url,omitempty"`
-	Url                 string            `json:"url,omitempty"`
-	DefaultBranch       string            `json:"default_branch,omitempty"`
+type pipeline struct {
 	BadgeURL            string            `json:"badge_url,omitempty"`
-	CreatedAt           string            `json:"created_at,omitempty"`
-	Repository          string            `json:"repository,omitempty"`
-	Name                string            `json:"name,omitempty"`
-	Description         string            `json:"description,omitempty"`
 	BranchConfiguration string            `json:"branch_configuration,omitempty"`
-	Provider            BuildkiteProvider `json:"provider,omitempty"`
+	BuildsURL           string            `json:"builds_url,omitempty"`
+	CreatedAt           string            `json:"created_at,omitempty"`
+	DefaultBranch       string            `json:"default_branch,omitempty"`
+	Description         string            `json:"description,omitempty"`
+	Environment         map[string]string `json:"env,omitempty"`
+	ID                  string            `json:"id,omitempty"`
+	Name                string            `json:"name,omitempty"`
+	Provider            buildkiteProvider `json:"provider,omitempty"`
 	ProviderSettings    map[string]bool   `json:"provider_settings,omitempty"`
-	Steps               []Step            `json:"steps"`
+	Repository          string            `json:"repository,omitempty"`
+	Slug                string            `json:"slug,omitempty"`
+	Steps               []step            `json:"steps"`
+	URL                 string            `json:"url,omitempty"`
+	WebURL              string            `json:"web_url,omitempty"`
 }
 
-type BuildkiteProvider struct {
-	Id         string                 `json:"id"`
+type buildkiteProvider struct {
+	ID         string                 `json:"id"`
 	Settings   map[string]interface{} `json:"settings"`
 	WebhookURL string                 `json:"webhook_url"`
 }
 
-type Step struct {
-	Type                string            `json:"type"`
-	Name                string            `json:"name,omitempty"`
-	Command             string            `json:"command,omitempty"`
-	Environment         map[string]string `json:"env,omitempty"`
-	TimeoutInMinutes    int               `json:"timeout_in_minutes,omitempty"`
+type step struct {
 	AgentQueryRules     []string          `json:"agent_query_rules,omitempty"`
-	BranchConfiguration string            `json:"branch_configuration,omitempty"`
 	ArtifactPaths       string            `json:"artifact_paths,omitempty"`
+	BranchConfiguration string            `json:"branch_configuration,omitempty"`
+	Command             string            `json:"command,omitempty"`
 	Concurrency         int               `json:"concurrency,omitempty"`
+	Environment         map[string]string `json:"env,omitempty"`
+	Name                string            `json:"name,omitempty"`
 	Parallelism         int               `json:"parallelism,omitempty"`
+	TimeoutInMinutes    int               `json:"timeout_in_minutes,omitempty"`
+	Type                string            `json:"type"`
 }
 
-func CreatePipeline(d *schema.ResourceData, meta interface{}) error {
+func createPipeline(d *schema.ResourceData, meta interface{}) error {
 	log.Printf("[TRACE] CreatePipeline")
 
 	client := meta.(*Client)
 
 	req := preparePipelineRequestPayload(d)
-	res := &Pipeline{}
+	res := &pipeline{}
 
 	err := client.Post([]string{"pipelines"}, req, res)
 	if err != nil {
@@ -198,13 +225,13 @@ func CreatePipeline(d *schema.ResourceData, meta interface{}) error {
 	return nil
 }
 
-func ReadPipeline(d *schema.ResourceData, meta interface{}) error {
+func readPipeline(d *schema.ResourceData, meta interface{}) error {
 	log.Printf("[TRACE] ReadPipeline")
 
 	client := meta.(*Client)
 	slug := d.Id()
 
-	res := &Pipeline{}
+	res := &pipeline{}
 
 	err := client.Get([]string{"pipelines", slug}, res)
 	if err != nil {
@@ -220,14 +247,14 @@ func ReadPipeline(d *schema.ResourceData, meta interface{}) error {
 	return nil
 }
 
-func UpdatePipeline(d *schema.ResourceData, meta interface{}) error {
+func updatePipeline(d *schema.ResourceData, meta interface{}) error {
 	log.Printf("[TRACE] UpdatePipeline")
 
 	client := meta.(*Client)
 	slug := d.Id()
 
 	req := preparePipelineRequestPayload(d)
-	res := &Pipeline{}
+	res := &pipeline{}
 
 	err := client.Patch([]string{"pipelines", slug}, req, res)
 	if err != nil {
@@ -239,7 +266,7 @@ func UpdatePipeline(d *schema.ResourceData, meta interface{}) error {
 	return nil
 }
 
-func DeletePipeline(d *schema.ResourceData, meta interface{}) error {
+func deletePipeline(d *schema.ResourceData, meta interface{}) error {
 	log.Printf("[TRACE] DeletePipeline")
 
 	client := meta.(*Client)
@@ -249,81 +276,82 @@ func DeletePipeline(d *schema.ResourceData, meta interface{}) error {
 	return client.Delete([]string{"pipelines", slug})
 }
 
-func updatePipelineFromAPI(d *schema.ResourceData, p *Pipeline) {
+func updatePipelineFromAPI(d *schema.ResourceData, p *pipeline) {
 	d.SetId(p.Slug)
-	d.Set("id", p.Id)
-	d.Set("env", p.Environment)
-	d.Set("name", p.Name)
-	d.Set("description", p.Description)
-	d.Set("repository", p.Repository)
-	d.Set("web_url", p.WebURL)
-	d.Set("slug", p.Slug)
-	d.Set("builds_url", p.BuildsURL)
-	d.Set("branch_configuration", p.BranchConfiguration)
-	d.Set("provider_settings", p.Provider.Settings)
-	d.Set("webhook_url", p.Provider.WebhookURL)
-	d.Set("default_branch", p.DefaultBranch)
+
+	d.Set(pipelineBuildsURL, p.BuildsURL)
+	d.Set(pipelineBranchConfiguration, p.BranchConfiguration)
+	d.Set(pipelineDefaultBranch, p.DefaultBranch)
+	d.Set(pipelineDescription, p.Description)
+	d.Set(pipelineEnv, p.Environment)
+	d.Set(pipelineID, p.ID)
+	d.Set(pipelineName, p.Name)
+	d.Set(pipelineProviderSettings, p.Provider.Settings)
+	d.Set(pipelineRepository, p.Repository)
+	d.Set(pipelineSlug, p.Slug)
+	d.Set(pipelineWebhookURL, p.Provider.WebhookURL)
+	d.Set(pipelineWebURL, p.WebURL)
 
 	stepMap := make([]interface{}, len(p.Steps))
-	for i, element := range p.Steps {
+	for i, vI := range p.Steps {
 		stepMap[i] = map[string]interface{}{
-			"type":                 element.Type,
-			"name":                 element.Name,
-			"command":              element.Command,
-			"env":                  element.Environment,
-			"agent_query_rules":    element.AgentQueryRules,
-			"branch_configuration": element.BranchConfiguration,
-			"artifact_paths":       element.ArtifactPaths,
-			"concurrency":          element.Concurrency,
-			"parallelism":          element.Parallelism,
-			"timeout_in_minutes":   element.TimeoutInMinutes,
+			stepAgentQueryRules:     vI.AgentQueryRules,
+			stepArtifactPaths:       vI.ArtifactPaths,
+			stepBranchConfiguration: vI.BranchConfiguration,
+			stepCommand:             vI.Command,
+			stepConcurrency:         vI.Concurrency,
+			stepEnv:                 vI.Environment,
+			stepName:                vI.Name,
+			stepParallelism:         vI.Parallelism,
+			stepTimeoutInMinutes:    vI.TimeoutInMinutes,
+			stepType:                vI.Type,
 		}
 	}
-	d.Set("step", stepMap)
+	d.Set(pipelineSteps, stepMap)
 }
 
-func preparePipelineRequestPayload(d *schema.ResourceData) *Pipeline {
-	req := &Pipeline{}
+func preparePipelineRequestPayload(d *schema.ResourceData) *pipeline {
+	req := &pipeline{}
 
-	req.Name = d.Get("name").(string)
-	req.DefaultBranch = d.Get("default_branch").(string)
-	req.Description = d.Get("description").(string)
-	req.Slug = d.Get("slug").(string)
-	req.Repository = d.Get("repository").(string)
-	req.BranchConfiguration = d.Get("branch_configuration").(string)
+	req.BranchConfiguration = d.Get(pipelineBranchConfiguration).(string)
+	req.DefaultBranch = d.Get(pipelineDefaultBranch).(string)
+	req.Description = d.Get(pipelineDescription).(string)
 	req.Environment = map[string]string{}
-	for k, vI := range d.Get("env").(map[string]interface{}) {
+	for k, vI := range d.Get(pipelineEnv).(map[string]interface{}) {
 		req.Environment[k] = vI.(string)
 	}
+	req.Name = d.Get(pipelineName).(string)
 	req.ProviderSettings = map[string]bool{}
-	for k, vI := range d.Get("provider_settings").(map[string]interface{}) {
+	for k, vI := range d.Get(pipelineProviderSettings).(map[string]interface{}) {
 		req.ProviderSettings[k] = vI.(bool)
 	}
+	req.Repository = d.Get(pipelineRepository).(string)
+	req.Slug = d.Get(pipelineSlug).(string)
 
-	stepsI := d.Get("step").([]interface{})
-	req.Steps = make([]Step, len(stepsI))
+	stepsI := d.Get(pipelineSteps).([]interface{})
+	req.Steps = make([]step, len(stepsI))
 
 	for i, stepI := range stepsI {
 		stepM := stepI.(map[string]interface{})
-		req.Steps[i] = Step{
-			Type:                stepM["type"].(string),
-			Name:                stepM["name"].(string),
-			Command:             stepM["command"].(string),
+		req.Steps[i] = step{
+			AgentQueryRules:     make([]string, len(stepM[stepAgentQueryRules].([]interface{}))),
+			ArtifactPaths:       stepM[stepArtifactPaths].(string),
+			BranchConfiguration: stepM[stepBranchConfiguration].(string),
+			Command:             stepM[stepCommand].(string),
+			Concurrency:         stepM[stepConcurrency].(int),
 			Environment:         map[string]string{},
-			AgentQueryRules:     make([]string, len(stepM["agent_query_rules"].([]interface{}))),
-			BranchConfiguration: stepM["branch_configuration"].(string),
-			ArtifactPaths:       stepM["artifact_paths"].(string),
-			Concurrency:         stepM["concurrency"].(int),
-			Parallelism:         stepM["parallelism"].(int),
-			TimeoutInMinutes:    stepM["timeout_in_minutes"].(int),
+			Name:                stepM[stepName].(string),
+			Parallelism:         stepM[stepParallelism].(int),
+			TimeoutInMinutes:    stepM[stepTimeoutInMinutes].(int),
+			Type:                stepM[stepType].(string),
 		}
 
-		for k, vI := range stepM["env"].(map[string]interface{}) {
-			req.Steps[i].Environment[k] = vI.(string)
-		}
-
-		for j, vI := range stepM["agent_query_rules"].([]interface{}) {
+		for j, vI := range stepM[stepAgentQueryRules].([]interface{}) {
 			req.Steps[i].AgentQueryRules[j] = vI.(string)
+		}
+
+		for k, vI := range stepM[stepEnv].(map[string]interface{}) {
+			req.Steps[i].Environment[k] = vI.(string)
 		}
 	}
 
