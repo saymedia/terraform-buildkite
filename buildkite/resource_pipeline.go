@@ -1,6 +1,8 @@
 package buildkite
 
 import (
+	"log"
+
 	"github.com/hashicorp/terraform/helper/schema"
 )
 
@@ -57,6 +59,10 @@ func resourcePipeline() *schema.Resource {
 				Required: true,
 			},
 			"branch_configuration": &schema.Schema{
+				Type:     schema.TypeString,
+				Optional: true,
+			},
+			"default_branch": &schema.Schema{
 				Type:     schema.TypeString,
 				Optional: true,
 			},
@@ -143,6 +149,7 @@ type Pipeline struct {
 	WebURL              string            `json:"web_url,omitempty"`
 	BuildsURL           string            `json:"builds_url,omitempty"`
 	Url                 string            `json:"url,omitempty"`
+	DefaultBranch       string            `json:"default_branch,omitempty"`
 	BadgeURL            string            `json:"badge_url,omitempty"`
 	CreatedAt           string            `json:"created_at,omitempty"`
 	Repository          string            `json:"repository,omitempty"`
@@ -174,6 +181,8 @@ type Step struct {
 }
 
 func CreatePipeline(d *schema.ResourceData, meta interface{}) error {
+	log.Printf("[TRACE] CreatePipeline")
+
 	client := meta.(*Client)
 
 	req := preparePipelineRequestPayload(d)
@@ -190,6 +199,8 @@ func CreatePipeline(d *schema.ResourceData, meta interface{}) error {
 }
 
 func ReadPipeline(d *schema.ResourceData, meta interface{}) error {
+	log.Printf("[TRACE] ReadPipeline")
+
 	client := meta.(*Client)
 	slug := d.Id()
 
@@ -210,6 +221,8 @@ func ReadPipeline(d *schema.ResourceData, meta interface{}) error {
 }
 
 func UpdatePipeline(d *schema.ResourceData, meta interface{}) error {
+	log.Printf("[TRACE] UpdatePipeline")
+
 	client := meta.(*Client)
 	slug := d.Id()
 
@@ -227,6 +240,8 @@ func UpdatePipeline(d *schema.ResourceData, meta interface{}) error {
 }
 
 func DeletePipeline(d *schema.ResourceData, meta interface{}) error {
+	log.Printf("[TRACE] DeletePipeline")
+
 	client := meta.(*Client)
 
 	slug := d.Id()
@@ -247,12 +262,31 @@ func updatePipelineFromAPI(d *schema.ResourceData, p *Pipeline) {
 	d.Set("branch_configuration", p.BranchConfiguration)
 	d.Set("provider_settings", p.Provider.Settings)
 	d.Set("webhook_url", p.Provider.WebhookURL)
+	d.Set("default_branch", p.DefaultBranch)
+
+	stepMap := make([]interface{}, len(p.Steps))
+	for i, element := range p.Steps {
+		stepMap[i] = map[string]interface{}{
+			"type":                 element.Type,
+			"name":                 element.Name,
+			"command":              element.Command,
+			"env":                  element.Environment,
+			"agent_query_rules":    element.AgentQueryRules,
+			"branch_configuration": element.BranchConfiguration,
+			"artifact_paths":       element.ArtifactPaths,
+			"concurrency":          element.Concurrency,
+			"parallelism":          element.Parallelism,
+			"timeout_in_minutes":   element.TimeoutInMinutes,
+		}
+	}
+	d.Set("step", stepMap)
 }
 
 func preparePipelineRequestPayload(d *schema.ResourceData) *Pipeline {
 	req := &Pipeline{}
 
 	req.Name = d.Get("name").(string)
+	req.DefaultBranch = d.Get("default_branch").(string)
 	req.Description = d.Get("description").(string)
 	req.Slug = d.Get("slug").(string)
 	req.Repository = d.Get("repository").(string)
@@ -281,6 +315,7 @@ func preparePipelineRequestPayload(d *schema.ResourceData) *Pipeline {
 			ArtifactPaths:       stepM["artifact_paths"].(string),
 			Concurrency:         stepM["concurrency"].(int),
 			Parallelism:         stepM["parallelism"].(int),
+			TimeoutInMinutes:    stepM["timeout_in_minutes"].(int),
 		}
 
 		for k, vI := range stepM["env"].(map[string]interface{}) {
