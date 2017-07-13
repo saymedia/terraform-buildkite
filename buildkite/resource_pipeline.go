@@ -77,7 +77,7 @@ func resourcePipeline() *schema.Resource {
 				Type:     schema.TypeMap,
 				Optional: true,
 				Elem: &schema.Schema{
-					Type: schema.TypeBool,
+					Type: schema.TypeString,
 				},
 			},
 			"webhook_url": &schema.Schema{
@@ -157,7 +157,7 @@ type Pipeline struct {
 	Description         string            `json:"description,omitempty"`
 	BranchConfiguration string            `json:"branch_configuration,omitempty"`
 	Provider            BuildkiteProvider `json:"provider,omitempty"`
-	ProviderSettings    map[string]bool   `json:"provider_settings,omitempty"`
+	ProviderSettings    map[string]string `json:"provider_settings,omitempty"`
 	Steps               []Step            `json:"steps"`
 }
 
@@ -295,9 +295,9 @@ func preparePipelineRequestPayload(d *schema.ResourceData) *Pipeline {
 	for k, vI := range d.Get("env").(map[string]interface{}) {
 		req.Environment[k] = vI.(string)
 	}
-	req.ProviderSettings = map[string]bool{}
+	req.ProviderSettings = map[string]string{}
 	for k, vI := range d.Get("provider_settings").(map[string]interface{}) {
-		req.ProviderSettings[k] = vI.(bool)
+		req.ProviderSettings[k] = vI.(string)
 	}
 
 	stepsI := d.Get("step").([]interface{})
