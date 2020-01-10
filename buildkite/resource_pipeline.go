@@ -76,6 +76,22 @@ func resourcePipeline() *schema.Resource {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
+			"skip_queued_branch_builds": &schema.Schema{
+				Type:     schema.TypeBool,
+				Optional: true,
+			},
+			"skip_queued_branch_builds_filter": &schema.Schema{
+				Type:     schema.TypeString,
+				Optional: true,
+			},
+			"cancel_running_branch_builds": &schema.Schema{
+				Type:     schema.TypeBool,
+				Optional: true,
+			},
+			"cancel_running_branch_builds_filter": &schema.Schema{
+				Type:     schema.TypeString,
+				Optional: true,
+			},
 			"step": &schema.Schema{
 				Type:     schema.TypeList,
 				Required: true,
@@ -235,22 +251,26 @@ func resourcePipeline() *schema.Resource {
 }
 
 type Pipeline struct {
-	Id                  string                 `json:"id,omitempty"`
-	Environment         map[string]string      `json:"env,omitempty"`
-	Slug                string                 `json:"slug,omitempty"`
-	WebURL              string                 `json:"web_url,omitempty"`
-	BuildsURL           string                 `json:"builds_url,omitempty"`
-	Url                 string                 `json:"url,omitempty"`
-	DefaultBranch       string                 `json:"default_branch,omitempty"`
-	BadgeURL            string                 `json:"badge_url,omitempty"`
-	CreatedAt           string                 `json:"created_at,omitempty"`
-	Repository          string                 `json:"repository,omitempty"`
-	Name                string                 `json:"name,omitempty"`
-	Description         string                 `json:"description,omitempty"`
-	BranchConfiguration string                 `json:"branch_configuration,omitempty"`
-	Provider            repositoryProvider     `json:"provider,omitempty"`
-	ProviderSettings    map[string]interface{} `json:"provider_settings,omitempty"`
-	Steps               []Step                 `json:"steps"`
+	Id                              string                 `json:"id,omitempty"`
+	Environment                     map[string]string      `json:"env,omitempty"`
+	Slug                            string                 `json:"slug,omitempty"`
+	WebURL                          string                 `json:"web_url,omitempty"`
+	BuildsURL                       string                 `json:"builds_url,omitempty"`
+	Url                             string                 `json:"url,omitempty"`
+	DefaultBranch                   string                 `json:"default_branch,omitempty"`
+	BadgeURL                        string                 `json:"badge_url,omitempty"`
+	CreatedAt                       string                 `json:"created_at,omitempty"`
+	Repository                      string                 `json:"repository,omitempty"`
+	Name                            string                 `json:"name,omitempty"`
+	Description                     string                 `json:"description,omitempty"`
+	BranchConfiguration             string                 `json:"branch_configuration,omitempty"`
+	SkipQueuedBranchBuilds          bool                   `json:"skip_queued_branch_builds,omitempty"`
+	SkipQueuedBranchBuildsFilter    string                 `json:"skip_queued_branch_builds_filter,omitempty"`
+	CancelRunningBranchBuilds       bool                   `json:"cancel_running_branch_builds,omitempty"`
+	CancelRunningBranchBuildsFilter string                 `json:"cancel_running_branch_builds_filter,omitempty"`
+	Provider                        repositoryProvider     `json:"provider,omitempty"`
+	ProviderSettings                map[string]interface{} `json:"provider_settings,omitempty"`
+	Steps                           []Step                 `json:"steps"`
 }
 
 type repositoryProvider struct {
@@ -379,6 +399,10 @@ func updatePipelineFromAPI(d *schema.ResourceData, p *Pipeline) error {
 	d.Set("builds_url", p.BuildsURL)
 	d.Set("branch_configuration", p.BranchConfiguration)
 	d.Set("default_branch", p.DefaultBranch)
+	d.Set("skip_queued_branch_builds", p.SkipQueuedBranchBuilds)
+	d.Set("skip_queued_branch_builds_filter", p.SkipQueuedBranchBuildsFilter)
+	d.Set("cancel_running_branch_builds", p.CancelRunningBranchBuilds)
+	d.Set("cancel_running_branch_builds_filter", p.CancelRunningBranchBuildsFilter)
 
 	stepMap := make([]interface{}, len(p.Steps))
 	for i, element := range p.Steps {
@@ -444,6 +468,11 @@ func preparePipelineRequestPayload(d *schema.ResourceData) *Pipeline {
 	req.Repository = d.Get("repository").(string)
 	req.BranchConfiguration = d.Get("branch_configuration").(string)
 	req.Environment = map[string]string{}
+	req.SkipQueuedBranchBuilds = d.Get("skip_queued_branch_builds").(bool)
+	req.SkipQueuedBranchBuildsFilter = d.Get("skip_queued_branch_builds_filter").(string)
+	req.CancelRunningBranchBuilds = d.Get("cancel_running_branch_builds").(bool)
+	req.CancelRunningBranchBuildsFilter = d.Get("cancel_running_branch_builds_filter").(string)
+
 	for k, vI := range d.Get("env").(map[string]interface{}) {
 		req.Environment[k] = vI.(string)
 	}

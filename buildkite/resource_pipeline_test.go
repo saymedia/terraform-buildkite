@@ -385,7 +385,7 @@ resource "buildkite_pipeline" "test_foo" {
     name = "test"
     command = "echo 'Hello World'"
   }
-  
+
   bitbucket_settings {
 	  build_tags = true
   }
