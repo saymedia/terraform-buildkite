@@ -101,6 +101,10 @@ func resourcePipeline() *schema.Resource {
 							Type:     schema.TypeString,
 							Required: true,
 						},
+						"label": &schema.Schema{
+							Type:     schema.TypeString,
+							Optional: true,
+						},
 						"name": &schema.Schema{
 							Type:     schema.TypeString,
 							Optional: true,
@@ -313,6 +317,7 @@ func (p *repositoryProvider) UnmarshalJSON(data []byte) error {
 type Step struct {
 	Type                string            `json:"type"`
 	Name                string            `json:"name,omitempty"`
+	Label               string            `json:"label,omitempty"`
 	Command             string            `json:"command,omitempty"`
 	Environment         map[string]string `json:"env,omitempty"`
 	TimeoutInMinutes    int               `json:"timeout_in_minutes,omitempty"`
@@ -408,6 +413,7 @@ func updatePipelineFromAPI(d *schema.ResourceData, p *Pipeline) error {
 	for i, element := range p.Steps {
 		stepMap[i] = map[string]interface{}{
 			"type":                 element.Type,
+			"label":                element.Label,
 			"name":                 element.Name,
 			"command":              element.Command,
 			"env":                  element.Environment,
@@ -484,6 +490,7 @@ func preparePipelineRequestPayload(d *schema.ResourceData) *Pipeline {
 		stepM := stepI.(map[string]interface{})
 		req.Steps[i] = Step{
 			Type:                stepM["type"].(string),
+			Label:               stepM["label"].(string),
 			Name:                stepM["name"].(string),
 			Command:             stepM["command"].(string),
 			Environment:         map[string]string{},
