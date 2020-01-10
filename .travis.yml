@@ -2,7 +2,7 @@ dist: trusty
 sudo: false
 language: go
 go:
-- 1.9.2
+- 1.12
 - tip
 
 matrix:
